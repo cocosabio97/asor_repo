@@ -8,7 +8,7 @@ int main(){
 	int resultado;
 	resultado = setuid(0);
 	if( resultado == -1){
-		printf("Error: ", strerror(errno), errno);
+		printf("Error: ", errno, strerror(errno));
 		perror("Motivo: ");
 	}else
 		printf("Todo ha ido bien");
