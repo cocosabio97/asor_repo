@@ -1,0 +1,5 @@
+man date
+
+date -R
+date -u
+date -I
