@@ -1,0 +1,4 @@
+Al borrar un enlace rígido, se borra el fichero y el inodo que se creó desaparece también.
+Al borrar un enlace simbólico se disminuye en uno el número de enlaces que aparecen en el inodo. El fichero cuyo contenido es la ruta del fichero original, desaparece.
+Al borrar el fichero original, si se trata de un enlace rígido, desaparece ese fichero, pero el otro queda completamente operativo porque el contenido es el mismo en los dos ficheros.
+Si por el contrario se trata de un enlace simbólico, el fichero original se borra, y el fichero "enlazado" queda inoperativo porque señala a un fichero que ha desaparecido.

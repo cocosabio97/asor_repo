@@ -1,0 +1,2 @@
+st_mtime en un directorio se cambia por la creación o el borrado de archivos en ese directorio.
+st_ctime se cambia al escribir u otorgar información al inodo (dueño, grupo, número de enlaces...)
