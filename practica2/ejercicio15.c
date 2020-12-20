@@ -5,59 +5,81 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv) {
 
 
-	if (argc < 2) {
-		 printf("Se debe especeficar la ruta del archivo en los parámetros del programa.\n");
-		 return -1;
-	}
+  if (argc < 2) {
+     printf("Introduce la ruta de datos.\n");
+     return -1;
+  }
 
-  DIR *directorio = opendir(argv[1]);
-
-  if (directorio == NULL ) {
-    printf("No existe el directorio.\n");
+  int fd = open(argv[1], O_CREAT | O_RDWR, 00777);
+  if (fd == -1) {
+    printf("No se ha podido abrir/crear el fichero.\n");
     return -1;
   }
 
-  struct dirent *current;
-  struct stat info;
-  size_t sizePath = strlen(argv[1]);
-  current = readdir(directorio);
-  unsigned long int totalsize = 0;
+  struct flock lock;
 
-  while (current != NULL) {
-    char *path = malloc(sizeof(char)*(sizePath + strlen(current->d_name) + 3));
-    strcpy(path, argv[1]);
-    strcat(path, "/");
-    strcat(path, current->d_name);
+  lock.l_type = F_UNLCK;
+  lock.l_whence = SEEK_SET;
+  lock.l_start = 0;
+  lock.l_len = 0;
+  lock.l_pid = getpid();
 
 
-    if (stat(path, &info) == -1) {
-      printf("No se puede analizar el archivo\n");
-      free(path);
-      closedir(directorio);
-      return -1;
+  int status = fcntl(fd, F_GETLK, &lock);
+
+  if (lock.l_type == F_UNLCK) {
+    printf("Cerrojo desbloqueado.\n");
+    lock.l_type = F_WRLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = getpid();
+
+    if (fcntl(fd, F_GETLK, &lock) == -1) {
+      printf("No se ha podido crear el cerrojo.\n");
+      close(fd);
+      return 1;
     } else {
-      if (S_ISREG(info.st_mode)) {
-        printf("[*] %s \n", current->d_name);
-        totalsize = totalsize + ((info.st_blksize/8)*info.st_blocks);
+      printf("Creado cerrojo de escritura\n");
 
-      } else if (S_ISDIR(info.st_mode)) {
-        printf("[/] %s \n", current->d_name);
+      //Write Date
+      time_t tim = time(NULL);
 
-      } else if (S_ISLNK(info.st_mode)) {
-        char *linkname = malloc(info.st_size + 1);
-        int rc2 = readlink(path, linkname, info.st_size + 1);
-        printf("[->]: %s->%s \n", current->d_name, linkname);
-        free(linkname);
-	     }
+      struct tm *tm = localtime(&tim);
+
+      char buffer[1024];
+
+      sprintf (buffer, "Hora: %d:%d\n", tm->tm_hour, tm->tm_min);
+
+      write(fd, &buffer, strlen(buffer));
+
+
+      sleep(30);
+
+      lock.l_type = F_WRLCK;
+      lock.l_whence = SEEK_SET;
+      lock.l_start = 0;
+      lock.l_len = 0;
+      lock.l_pid = getpid();
+      
+      if (fcntl(fd, F_GETLK, &lock) == -1) {
+        printf("No se ha podido crear el cerrojo.\n");
+        close(fd);
+        return 1;
+      } else
+      close(fd);
     }
-    printf("Total ficheros: %lu KB\n", totalsize);
-    free(path);
-    current = readdir(directorio);
+
+  } else {
+    printf("Cerrojo bloqueado.\n");
+    close(fd);
+    return 1;
   }
 
-  closedir(directorio);
-  return 0;
+  close(fd);
+
+
 }
