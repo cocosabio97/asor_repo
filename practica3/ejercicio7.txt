@@ -1,0 +1,3 @@
+La diferencia entre ./ejecuta ps -el y ./ejecuta "ps -el" es que 
+el primero de estos comandos tiene dos argumentos pasados, ps el primero y el flag -el el segundo.
+El segundo tiene un único parámetro en formato string cuyo valor es "ps -el"
