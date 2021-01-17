@@ -1,0 +1,4 @@
+Con la señal SIGHUP el proceso termina
+Con la señal SIGINT se interrumpe el sleep y el terminal vuelve a ser funcional
+COn la señal SIGKILL se interrumpe el sleep y el proceso queda "killed" 
+Con la señal SIGSEGV el sleep queda interrumpido y se produce una violación de segmento.
